@@ -1,0 +1,41 @@
+# Joy Autopost ayarları — değiştirmek için bu dosyayı düzenle.
+
+# Joy'un modelde tetikleyici kelimesi (LoRA eğitiminde kullanılan)
+trigger_word: "JOYDOG"
+
+# Joy'un sabit görünümü: her prompt'a eklenir
+dog_description: >-
+  JOYDOG, an Afghan hound with a blue-grey curly textured coat with cream and beige
+  tones, brindle speckled pattern on the face and muzzle, black nose, calm dark brown
+  eyes with slightly heavy lids, long grey-cream tasseled ears, light cream chest,
+  long legs, tail curled into a ring, no collar, bare neck
+
+# Görsel stili
+style: >-
+  photorealistic wildlife-style photograph, natural light, shallow depth of field,
+  35mm lens, high detail fur texture, cinematic color grading
+
+negative_hints: >-
+  no people, no leash, no collar, no text, no watermark, correct anatomy with exactly
+  four legs
+
+# Replicate model (LoRA eğitimi bitince "kullanıcı/model:versiyon" ile doldurulacak).
+# Ortam değişkeni REPLICATE_MODEL varsa o kullanılır.
+replicate_model: ""
+lora_scale: 1.0
+aspect_ratio: "4:5"
+
+# Caption dili: "tr", "en" veya "tr+en"
+caption_language: "tr+en"
+
+# Kalite kontrolde en fazla kaç kez yeniden üretilsin
+max_attempts: 3
+
+# Mod: "approval" (önce GitHub Issue ile onay) veya "auto" (direkt paylaş)
+mode: "approval"
+
+# Son kaç sahne tekrar edilmesin
+no_repeat_window: 10
+
+# Instagram Graph API sürümü
+graph_version: "v23.0"

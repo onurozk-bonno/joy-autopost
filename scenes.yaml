@@ -1,0 +1,52 @@
+# Sahne kütüphanesi. Her sahne bir mekân + birkaç poz/ışık varyasyonu.
+# Yeni sahne eklemek için aynı formatta satır ekle.
+
+scenes:
+  - id: lake_mist
+    place: "on the shore of a calm alpine lake at dawn, light mist over the water, pine forest behind"
+    poses: ["standing in profile looking across the water", "sitting on a flat rock", "walking along the shoreline"]
+    seasons: [spring, summer, autumn]
+  - id: waterfall
+    place: "beside a tall waterfall in a mossy gorge, spray catching the light"
+    poses: ["standing on wet stones gazing up", "sitting calmly at the edge of the pool"]
+    seasons: [spring, summer]
+  - id: mountain_meadow
+    place: "in a high mountain meadow full of wildflowers, snowy peaks in the distance"
+    poses: ["running through the grass, ears flying", "lying in the flowers", "standing alert on a small hill"]
+    seasons: [spring, summer]
+  - id: river_bed
+    place: "in a shallow clear river with rounded pebbles, sunlight through trees"
+    poses: ["wading through the shallow water", "drinking from the stream", "standing mid-river looking back"]
+    seasons: [summer, autumn]
+  - id: forest_fog
+    place: "on a path through a foggy old-growth forest, soft diffused light"
+    poses: ["walking toward the camera", "standing between tall trunks", "sitting on a fallen log"]
+    seasons: [autumn, winter, spring]
+  - id: steppe_sunset
+    place: "on the open steppe at golden hour, tall dry grass glowing in the low sun"
+    poses: ["silhouetted against the sunset", "running across the plain", "standing proud on a rise"]
+    seasons: [summer, autumn]
+  - id: beach_dunes
+    place: "on a wild sandy beach with dunes and gentle waves"
+    poses: ["running along the wet sand at the waterline", "sitting on a dune looking at the sea", "standing in the wind"]
+    seasons: [spring, summer, autumn]
+  - id: autumn_lake
+    place: "by a lake surrounded by orange and red autumn trees reflected in the water"
+    poses: ["standing on a wooden jetty", "lying on fallen leaves near the water"]
+    seasons: [autumn]
+  - id: snowy_forest
+    place: "in a quiet snowy forest clearing, fresh snow, pale winter light"
+    poses: ["leaping through the snow", "standing still with snowflakes on the coat"]
+    seasons: [winter]
+  - id: canyon_stream
+    place: "in a narrow canyon with a turquoise stream and sculpted rock walls"
+    poses: ["standing on a boulder by the stream", "walking along the water's edge"]
+    seasons: [spring, summer, autumn]
+  - id: lavender_hill
+    place: "on a hillside near a lake, wild lavender and olive trees, Aegean light"
+    poses: ["sitting among the lavender", "walking down the slope toward the water"]
+    seasons: [summer]
+  - id: rainy_marsh
+    place: "at the edge of a reed marsh after rain, puddles reflecting the sky"
+    poses: ["standing in the reeds", "shaking water off the coat"]
+    seasons: [spring, autumn]
