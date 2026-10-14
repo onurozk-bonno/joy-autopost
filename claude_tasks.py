@@ -6,7 +6,7 @@ import json
 import os
 import re
 
-
+import anthropic
 
 from common import log, require_env
 
@@ -14,9 +14,7 @@ from common import log, require_env
 DEFAULT_MODEL = "claude-sonnet-4-5"
 
 
-def _client():
-    import anthropic
-
+def _client() -> anthropic.Anthropic:
     return anthropic.Anthropic(api_key=require_env("ANTHROPIC_API_KEY"))
 
 
