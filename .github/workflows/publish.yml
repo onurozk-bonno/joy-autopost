@@ -1,0 +1,56 @@
+name: Onaylanan taslagi paylas
+
+on:
+  issues:
+    types: [labeled]
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: joy-autopost
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    # Sadece "onay" etiketi ve depo sahibinin eklediği etiket
+    if: github.event.label.name == 'onay' && github.actor == github.repository_owner && startsWith(github.event.issue.title, 'Taslak ')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - run: pip install -r requirements.txt
+
+      - name: Taslak ID
+        id: meta
+        env:
+          TITLE: ${{ github.event.issue.title }}
+        run: |
+          ID="${TITLE#Taslak }"
+          if ! [[ "$ID" =~ ^[0-9]{8}-[0-9]{4}$ ]]; then echo "Geçersiz başlık: $TITLE"; exit 1; fi
+          echo "draft_id=$ID" >> "$GITHUB_OUTPUT"
+
+      - name: Instagram'da paylaş
+        id: publish
+        env:
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          IG_USER_ID: ${{ secrets.IG_USER_ID }}
+        run: python main.py publish --draft "${{ steps.meta.outputs.draft_id }}"
+
+      - name: Kaydet ve Issue'yu kapat
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git config user.name "joy-autopost"
+          git config user.email "joy-autopost@users.noreply.github.com"
+          git add -A
+          git commit -m "Paylaşıldı ${{ steps.meta.outputs.draft_id }}" || true
+          git push
+          gh issue comment ${{ github.event.issue.number }} --body "Paylaşıldı: ${{ steps.publish.outputs.permalink }}"
+          gh issue close ${{ github.event.issue.number }}

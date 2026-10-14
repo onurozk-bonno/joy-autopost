@@ -1,0 +1,79 @@
+name: Gunluk Joy paylasimi
+
+on:
+  schedule:
+    # Her gün 15:43 UTC = 18:43 İstanbul
+    - cron: "43 15 * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: joy-autopost
+  cancel-in-progress: false
+
+jobs:
+  draft:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - run: pip install -r requirements.txt
+
+      - name: Taslak üret (sahne + görsel + kalite kontrol + caption)
+        id: draft
+        env:
+          REPLICATE_API_TOKEN: ${{ secrets.REPLICATE_API_TOKEN }}
+          REPLICATE_MODEL: ${{ vars.REPLICATE_MODEL }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          CLAUDE_MODEL: ${{ vars.CLAUDE_MODEL }}
+        run: python main.py draft
+
+      - name: Taslağı kaydet
+        run: |
+          git config user.name "joy-autopost"
+          git config user.email "joy-autopost@users.noreply.github.com"
+          git add -A
+          git commit -m "Taslak ${{ steps.draft.outputs.draft_id }}"
+          git push
+
+      - name: Mod öğren
+        id: mode
+        run: |
+          MODE="${{ vars.POST_MODE }}"
+          if [ -z "$MODE" ]; then MODE=$(python -c "from common import load_settings;print(load_settings()['mode'])"); fi
+          echo "mode=$MODE" >> "$GITHUB_OUTPUT"
+
+      # --- Onay modu: taslağı Issue olarak aç, "onay" etiketi eklenince publish.yml paylaşır
+      - name: Onay için Issue aç
+        if: steps.mode.outputs.mode == 'approval'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          DRAFT_ID: ${{ steps.draft.outputs.draft_id }}
+        run: |
+          gh label create onay --color 2ea043 --description "Paylaşımı onayla" 2>/dev/null || true
+          gh label create taslak --color d4c5f9 --description "Onay bekleyen taslak" 2>/dev/null || true
+          CAPTION=$(python -c "import json;print(json.load(open('drafts/$DRAFT_ID.json'))['caption'])")
+          IMG="https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/${GITHUB_REF_NAME}/drafts/${DRAFT_ID}.jpg"
+          BODY=$(printf '![Joy](%s)\n\n**Caption:**\n\n%s\n\n---\nPaylaşmak için bu Issue’ya **onay** etiketini ekle. Beğenmediysen Issue’yu kapat.' "$IMG" "$CAPTION")
+          gh issue create --title "Taslak $DRAFT_ID" --label taslak --body "$BODY"
+
+      # --- Otomatik mod: direkt paylaş
+      - name: Direkt paylaş
+        if: steps.mode.outputs.mode == 'auto'
+        env:
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          IG_USER_ID: ${{ secrets.IG_USER_ID }}
+        run: |
+          sleep 20
+          python main.py publish --draft "${{ steps.draft.outputs.draft_id }}"
+          git add -A
+          git commit -m "Paylaşıldı ${{ steps.draft.outputs.draft_id }}"
+          git push

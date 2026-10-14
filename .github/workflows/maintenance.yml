@@ -1,0 +1,46 @@
+name: Token kontrol ve yenileme
+
+on:
+  schedule:
+    # Her ayın 1'i ve 15'i: Instagram token'ını yenile (60 günlük)
+    - cron: "17 6 1,15 * *"
+  workflow_dispatch:
+    inputs:
+      only_check:
+        description: "Sadece bağlantıyı test et (token yenileme yok)"
+        type: boolean
+        default: true
+
+jobs:
+  token:
+    runs-on: ubuntu-latest
+    env:
+      HAS_ADMIN: ${{ secrets.GH_ADMIN_TOKEN != '' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+
+      - name: Bağlantı testi
+        env:
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          IG_USER_ID: ${{ secrets.IG_USER_ID }}
+        run: python main.py check
+
+      - name: Token yenile
+        id: refresh
+        if: github.event_name == 'schedule' || inputs.only_check == false
+        env:
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+        run: python main.py refresh-token
+
+      # Yenilenen token'ı secret'a yazmak için GH_ADMIN_TOKEN (secrets yazma yetkili
+      # fine-grained token) gerekir. Yoksa bu adım atlanır; eski token 60 gün boyunca geçerli kalır.
+      - name: Secret'ı güncelle
+        if: steps.refresh.outputs.new_token != '' && env.HAS_ADMIN == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GH_ADMIN_TOKEN }}
+          NEW_TOKEN: ${{ steps.refresh.outputs.new_token }}
+        run: gh secret set IG_ACCESS_TOKEN --body "$NEW_TOKEN" --repo "$GITHUB_REPOSITORY"
