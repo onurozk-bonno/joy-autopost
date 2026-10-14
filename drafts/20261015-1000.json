@@ -12,6 +12,9 @@
   "qc": {
     "note": "gerçek fotoğraf"
   },
-  "status": "draft",
-  "real_photo": true
+  "status": "published",
+  "real_photo": true,
+  "published_at": "2026-10-14T21:47:31.047129+00:00",
+  "media_id": "18356584756171429",
+  "permalink": "https://www.instagram.com/p/DefYh00gfKU/"
 }
