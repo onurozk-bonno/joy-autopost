@@ -12,6 +12,8 @@ import json
 import os
 import sys
 
+import io
+
 from claude_tasks import quality_check, write_caption
 from common import DRAFTS_DIR, load_history, load_settings, log, now_utc, save_history
 from generate import generate_image
@@ -37,10 +39,15 @@ def cmd_draft(settings: dict) -> str:
     prompt = build_prompt(settings, scene)
     log(f"Sahne: {scene['scene_id']} / {scene['pose']}")
 
+    has_claude = bool(os.getenv("ANTHROPIC_API_KEY"))
     image, qc = None, None
     for attempt in range(1, settings["max_attempts"] + 1):
         log(f"Deneme {attempt}/{settings['max_attempts']}")
-        candidate = generate_image(settings, prompt)
+        candidate = to_jpeg(generate_image(settings, prompt))
+        if not has_claude:
+            # No Claude key: skip automatic QC, the human approves in the GitHub Issue
+            image, qc = candidate, {"pass": None, "note": "Claude anahtarı yok, kalite kontrolü onay modunda sende"}
+            break
         qc = quality_check(candidate)
         if qc.get("pass"):
             image = candidate
@@ -48,7 +55,10 @@ def cmd_draft(settings: dict) -> str:
     if image is None:
         raise SystemExit(f"{settings['max_attempts']} denemede kaliteli görsel çıkmadı. Son QC: {qc}")
 
-    caption = write_caption(scene, settings["caption_language"])
+    if has_claude:
+        caption = write_caption(scene, settings["caption_language"])
+    else:
+        caption = fallback_caption(scene)
 
     draft_id = now_utc().strftime("%Y%m%d-%H%M")
     DRAFTS_DIR.mkdir(exist_ok=True)
@@ -61,6 +71,42 @@ def cmd_draft(settings: dict) -> str:
     log(f"Taslak hazır: drafts/{draft_id}.jpg")
     set_output("draft_id", draft_id)
     return draft_id
+
+
+def to_jpeg(data: bytes) -> bytes:
+    """Instagram only accepts JPEG."""
+    from PIL import Image
+
+    img = Image.open(io.BytesIO(data)).convert("RGB")
+    out = io.BytesIO()
+    img.save(out, format="JPEG", quality=92)
+    return out.getvalue()
+
+
+FALLBACK_LINES = {
+    "lake_mist": ("Sis kalkarken göl de, ben de sessizce uyanıyoruz.", "The mist lifts, and the lake and I wake up quietly."),
+    "waterfall": ("Suyun sesi, düşüncelerimden daha yüksek.", "The water is louder than my thoughts."),
+    "mountain_meadow": ("Rüzgâr kulaklarıma yolu anlatıyor.", "The wind tells my ears which way to go."),
+    "river_bed": ("Akıntıya karşı değil, akıntıyla birlikte.", "Not against the current, but with it."),
+    "forest_fog": ("Sisli ormanda her ağaç bir sır saklıyor.", "In the foggy forest, every tree keeps a secret."),
+    "steppe_sunset": ("Güneş batarken bozkır altına dönüyor.", "At sunset the steppe turns to gold."),
+    "beach_dunes": ("Dalgalar gelip gidiyor, ben kalıyorum.", "The waves come and go; I stay."),
+    "autumn_lake": ("Sonbahar göle düşünce iki kez güzel.", "Autumn is twice as beautiful when it falls on a lake."),
+    "snowy_forest": ("Kar, adımlarımı tek tek saklıyor.", "The snow keeps my footsteps one by one."),
+    "canyon_stream": ("Taşların arasından turkuaz bir şarkı akıyor.", "A turquoise song runs between the stones."),
+    "lavender_hill": ("Ege ışığında lavanta kokulu bir öğleden sonra.", "A lavender-scented afternoon in Aegean light."),
+    "rainy_marsh": ("Yağmurdan sonra dünya yeniden yıkanmış gibi.", "After the rain, the world feels newly washed."),
+}
+
+
+def fallback_caption(scene: dict) -> str:
+    tr, en = FALLBACK_LINES.get(scene["scene_id"], ("Doğada özgür bir ruh.", "A free spirit in the wild."))
+    return (
+        f"{tr}\nJoy'un hayal sahnelerinden biri 🌿\n\n"
+        f"{en}\nOne of Joy's dream scenes.\n\n"
+        "#afghanhound #afgantazısı #joytheafghanhound #aiart #yapayzeka #dogsofinstagram "
+        "#köpek #doğa #naturelovers #sighthound"
+    )
 
 
 def image_url_for(draft_id: str) -> str:
