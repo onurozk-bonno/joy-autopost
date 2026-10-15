@@ -34,5 +34,8 @@ Variables:
 - **Actions → Token kontrol ve yenileme → Run workflow**: Instagram bağlantısını test eder.
 - Saat: her gün 18:43 (İstanbul). Değiştirmek için `daily.yml` içindeki `cron` satırı.
 
+## Düzen
+`src/` kod, `config/` ayarlar ve sahneler, `state/history.json` geçmiş, `drafts/` taslaklar. Yerelde: `pip install -r requirements.txt` (+ `requirements-claude.txt`, `requirements-replicate.txt` gerekirse), `python src/main.py draft`.
+
 ## Not
 Depo **public** olmalı: Instagram görseli `raw.githubusercontent.com` adresinden çeker. Depoda gizli bilgi yoktur; tüm anahtarlar GitHub Secrets'ta durur.

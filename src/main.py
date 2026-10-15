@@ -58,7 +58,7 @@ def cmd_draft(settings: dict) -> str:
     if has_claude:
         caption = write_caption(scene, settings["caption_language"])
     else:
-        caption = fallback_caption(scene)
+        caption = fallback_caption(scene, len(load_history()))
 
     draft_id = now_utc().strftime("%Y%m%d-%H%M")
     DRAFTS_DIR.mkdir(exist_ok=True)
@@ -108,13 +108,14 @@ SCENE_TAGS = {
 }
 
 
-def fallback_caption(scene: dict) -> str:
+def fallback_caption(scene: dict, rotation: int = 0) -> str:
+    """rotation: deterministic counter (e.g. number of published posts) that alternates the last hashtag."""
     tr, en = FALLBACK_LINES.get(scene["scene_id"], ("Doğada özgür bir ruh.", "A free spirit in the wild."))
     return (
         f"{tr}\nJoy'un hayal sahnelerinden biri 🌿\n\n"
         f"{en}\nOne of Joy's dream scenes.\n\n"
         f"#afghanhound #joytheafghanhound {SCENE_TAGS.get(scene['scene_id'], '#naturedog')} #aiart "
-        f"{'#afgantazısı' if hash(scene['scene_id']) % 2 else '#sighthound'}"
+        f"{'#afgantazısı' if rotation % 2 else '#sighthound'}"
     )
 
 

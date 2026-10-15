@@ -25,8 +25,18 @@ jobs:
           python-version: "3.12"
           cache: pip
 
-      - run: pip install -r requirements.txt
+      - name: Bağımlılıkları kur (anthropic/replicate sadece gerekirse)
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          IMAGE_BACKEND: ${{ vars.IMAGE_BACKEND }}
+        run: |
+          pip install -r requirements.txt
+          if [ -n "$ANTHROPIC_API_KEY" ]; then pip install -r requirements-claude.txt; fi
+          BACKEND="$IMAGE_BACKEND"
+          if [ -z "$BACKEND" ]; then BACKEND=$(PYTHONPATH=src python -c "from common import load_settings;print(load_settings().get('image_backend',''))"); fi
+          if [ "$BACKEND" = "replicate" ]; then pip install -r requirements-replicate.txt; fi
 
+      # Hata olursa (ör. Gemini 429 kota) workflow kırmızı olmaz; aşağıda Issue açılır.
       - name: Taslak üret (sahne + görsel + kalite kontrol + caption)
         id: draft
         env:
@@ -38,9 +48,39 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GEMINI_MODEL: ${{ vars.GEMINI_MODEL }}
           IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
-        run: python main.py draft
+        run: |
+          set +e
+          python src/main.py draft 2>&1 | tee "$RUNNER_TEMP/draft.log"
+          RC=${PIPESTATUS[0]}
+          if [ "$RC" -eq 0 ]; then
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::Taslak üretilemedi (çıkış kodu $RC); Issue açılacak."
+          fi
+          exit 0
+
+      - name: Hata Issue'su aç / yorumla
+        if: steps.draft.outputs.ok == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          gh label create taslak-hata --color d93f0b --description "Günlük taslak üretimi başarısız" 2>/dev/null || true
+          # Son satırlardan kısa özet (ortak/public repo: anahtar benzeri değerleri maskele)
+          SUMMARY=$(grep -v '^\s*$' "$RUNNER_TEMP/draft.log" | tail -n 12 | cut -c1-400 \
+            | sed -E 's/AIza[0-9A-Za-z_-]{20,}/***/g; s/(key|token)=[^&[:space:]]+/\1=***/Ig')
+          BODY=$(printf '**Tarih:** %s\n**Çalıştırma:** %s\n\nSon log satırları:\n\n```\n%s\n```\n\nGenellikle Gemini kotası (429) veya geçici servis hatasıdır. Yarınki çalıştırma yeniden dener; acil ise Actions’tan **Run workflow** ile elle başlat.' "$(date -u +%Y-%m-%d\ %H:%M\ UTC)" "$RUN_URL" "$SUMMARY")
+          # Açık bir hata Issue'su varsa yenisini açma, ona yorum ekle (günde tek Issue)
+          EXISTING=$(gh issue list --label taslak-hata --state open --limit 1 --json number --jq '.[0].number // empty')
+          if [ -n "$EXISTING" ]; then
+            gh issue comment "$EXISTING" --body "$BODY"
+          else
+            gh issue create --title "Taslak üretilemedi" --label taslak-hata --body "$BODY"
+          fi
 
       - name: Taslağı kaydet
+        if: steps.draft.outputs.ok == 'true'
         run: |
           git config user.name "joy-autopost"
           git config user.email "joy-autopost@users.noreply.github.com"
@@ -50,14 +90,15 @@ jobs:
 
       - name: Mod öğren
         id: mode
+        if: steps.draft.outputs.ok == 'true'
         run: |
           MODE="${{ vars.POST_MODE }}"
-          if [ -z "$MODE" ]; then MODE=$(python -c "from common import load_settings;print(load_settings()['mode'])"); fi
+          if [ -z "$MODE" ]; then MODE=$(PYTHONPATH=src python -c "from common import load_settings;print(load_settings()['mode'])"); fi
           echo "mode=$MODE" >> "$GITHUB_OUTPUT"
 
       # --- Onay modu: taslağı Issue olarak aç, "onay" etiketi eklenince publish.yml paylaşır
       - name: Onay için Issue aç
-        if: steps.mode.outputs.mode == 'approval'
+        if: steps.draft.outputs.ok == 'true' && steps.mode.outputs.mode == 'approval'
         env:
           GH_TOKEN: ${{ github.token }}
           DRAFT_ID: ${{ steps.draft.outputs.draft_id }}
@@ -71,13 +112,13 @@ jobs:
 
       # --- Otomatik mod: direkt paylaş
       - name: Direkt paylaş
-        if: steps.mode.outputs.mode == 'auto'
+        if: steps.draft.outputs.ok == 'true' && steps.mode.outputs.mode == 'auto'
         env:
           IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
           IG_USER_ID: ${{ secrets.IG_USER_ID }}
         run: |
           sleep 20
-          python main.py publish --draft "${{ steps.draft.outputs.draft_id }}"
+          python src/main.py publish --draft "${{ steps.draft.outputs.draft_id }}"
           git add -A
           git commit -m "Paylaşıldı ${{ steps.draft.outputs.draft_id }}"
           git pull --rebase --autostash && git push

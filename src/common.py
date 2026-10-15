@@ -8,7 +8,8 @@ from pathlib import Path
 
 import yaml
 
-# Works both with src/, config/, state/ folders and with all files flat in the repo root.
+# Layout: src/*.py, config/*.yaml, state/history.json, drafts/ at repo root.
+# (Falls back to a flat layout if config/ or state/ do not exist.)
 _HERE = Path(__file__).resolve().parent
 ROOT = _HERE.parent if _HERE.name == "src" else _HERE
 CONFIG_DIR = ROOT / "config" if (ROOT / "config").is_dir() else ROOT

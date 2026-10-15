@@ -2,7 +2,7 @@
 
 Kullanım (bir kez, bilgisayardan veya GitHub Actions'tan):
   export REPLICATE_API_TOKEN=...
-  python training/train_lora.py --zip training/joy_photos.zip --owner REPLICATE_KULLANICI_ADIN
+  python src/train_lora.py --zip training/joy_photos.zip --owner REPLICATE_KULLANICI_ADIN
 
 joy_photos.zip: Joy'un 10-20 net fotoğrafı (tasmasız tercih edilir, insan yok).
 Eğitim ~20-30 dk sürer; bitince çıkan "owner/joy-flux:versiyon" değerini

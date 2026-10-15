@@ -22,11 +22,10 @@
 - `daily.yml` Gemini ile hiç başarıyla koşmadı → manuel `Run workflow` ile test et, logu oku.
 - Token yenileme: `maintenance.yml` yeniler ama secret'ı yazmak için GH_ADMIN_TOKEN gerek; yoksa ~13 Aralık'ta paylaşım durur.
 - API ile yüklenen Reels'e Instagram AI etiketi otomatik gelmeyebilir → kontrol listesi.
-- Fallback caption'daki `hash()` Python'da süreçten sürece değişir (rotasyon rastgele) — sorun değil ama deterministik yapılabilir.
 
 ## 4. Yol haritası
 **Hafta 1 — Sağlamlaştırma**
-1. Repo düzeni: src/, config/, state/ klasörlerine taşı; zip ve __pycache__ sil; .gitignore.
+1. ~~Repo düzeni~~ (yapıldı: src/, config/, state/).
 2. Gemini taslağını uçtan uca test et; QC olmadan çıkan görselleri onay modunda değerlendir.
 3. GH_ADMIN_TOKEN (fine-grained, sadece bu repo, Secrets: write) → token yenileme otomatik.
 4. Bekleyen taslakları (2001, 2003, 2004) Onur'un seçtiği günlere planla.
