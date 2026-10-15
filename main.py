@@ -3,6 +3,7 @@
   python src/main.py check                 -> token ve hesabı test eder
   python src/main.py draft                 -> sahne seçer, görsel + caption üretir, drafts/ altına kaydeder
   python src/main.py publish --draft ID    -> taslağı Instagram'da paylaşır
+  python main.py reel --from img.jpg --text "satır1|satır2" [--emphasis X] [--music] -> Reels taslağı (paylaşmaz)
   python src/main.py refresh-token         -> 60 günlük token'ı yeniler (yeni token'ı yazdırmaz)
 """
 from __future__ import annotations
@@ -151,6 +152,43 @@ def cmd_publish(settings: dict, draft_id: str) -> None:
     set_output("permalink", result.get("permalink") or "")
 
 
+def reel_caption(lines: list[str], emphasis: str | None, scene_id: str | None) -> str:
+    """Caption for a text reel: the lines themselves + AI disclosure + max 5 hashtags."""
+    body = "\n".join(lines)
+    if emphasis:
+        body += f"\n\n{emphasis} 🌿"
+    tag = SCENE_TAGS.get(scene_id or "", "#naturedog")
+    return (f"{body}\nJoy'un hayal sahnelerinden biri ✨\n\n"
+            f"#afghanhound #joytheafghanhound {tag} #aiart #sighthound")
+
+
+def cmd_reel(src: str, text: str, emphasis: str | None, music: bool, seconds: int,
+             out: str | None, scene_id: str | None) -> None:
+    """Build a reel draft from an existing image. Never publishes."""
+    from pathlib import Path
+
+    from reel import make_reel
+
+    lines = [t.strip() for t in text.split("|") if t.strip()] if text else []
+    if out:
+        out_path = Path(out)
+        draft_id = None
+    else:
+        draft_id = now_utc().strftime("%Y%m%d-%H%M")
+        DRAFTS_DIR.mkdir(exist_ok=True)
+        out_path = DRAFTS_DIR / f"{draft_id}.mp4"
+    make_reel(Path(src), out_path, seconds=seconds, lines=lines, emphasis=emphasis, music=music)
+    log(f"Reel hazır: {out_path}")
+    if draft_id:
+        (DRAFTS_DIR / f"{draft_id}.json").write_text(json.dumps({
+            "id": draft_id, "media_type": "reel", "scene": {"scene_id": scene_id or "custom"},
+            "source": Path(src).name, "caption": reel_caption(lines, emphasis, scene_id),
+            "status": "draft",
+        }, ensure_ascii=False, indent=2), encoding="utf-8")
+        log(f"Taslak json: drafts/{draft_id}.json (paylaşılmadı)")
+        set_output("draft_id", draft_id)
+
+
 def cmd_refresh(settings: dict) -> None:
     data = refresh_token(settings)
     days = int(data.get("expires_in", 0)) // 86400
@@ -164,9 +202,21 @@ def cmd_refresh(settings: dict) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("command", choices=["check", "draft", "publish", "refresh-token"])
+    parser.add_argument("command", choices=["check", "draft", "publish", "refresh-token", "reel"])
     parser.add_argument("--draft", help="publish için taslak ID")
+    parser.add_argument("--from", dest="src", help="reel için kaynak görsel (jpg)")
+    parser.add_argument("--text", default="", help="reel satırları, '|' ile ayrılmış")
+    parser.add_argument("--emphasis", help="reel vurgu satırı")
+    parser.add_argument("--music", action="store_true", help="özgün üretilmiş müzik ekle")
+    parser.add_argument("--seconds", type=int, default=10)
+    parser.add_argument("--out", help="çıktı mp4 yolu (verilmezse drafts/<id>.mp4 + json)")
+    parser.add_argument("--scene", help="caption için sahne ID (hashtag)")
     args = parser.parse_args()
+    if args.command == "reel":
+        if not args.src:
+            sys.exit("--from gerekli")
+        cmd_reel(args.src, args.text, args.emphasis, args.music, args.seconds, args.out, args.scene)
+        return
     settings = load_settings()
 
     if args.command == "check":
