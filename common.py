@@ -8,9 +8,11 @@ from pathlib import Path
 
 import yaml
 
-ROOT = Path(__file__).resolve().parent.parent
-CONFIG_DIR = ROOT / "config"
-STATE_FILE = ROOT / "state" / "history.json"
+# Works both with src/, config/, state/ folders and with all files flat in the repo root.
+_HERE = Path(__file__).resolve().parent
+ROOT = _HERE.parent if _HERE.name == "src" else _HERE
+CONFIG_DIR = ROOT / "config" if (ROOT / "config").is_dir() else ROOT
+STATE_FILE = ROOT / "state" / "history.json" if (ROOT / "state").is_dir() else ROOT / "history.json"
 DRAFTS_DIR = ROOT / "drafts"
 
 

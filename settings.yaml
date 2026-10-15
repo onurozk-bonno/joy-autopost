@@ -40,5 +40,6 @@ no_repeat_window: 10
 # Instagram Graph API sürümü
 graph_version: "v23.0"
 
-# Görsel servisi: "pollinations" (ücretsiz, model eğitimi yok) veya "replicate" (Joy LoRA modeli)
-image_backend: "pollinations"
+# Görsel servisi: "gemini" (Joy referans fotoğraflarıyla), "replicate" (Joy LoRA modeli) veya "pollinations"
+image_backend: "gemini"
+gemini_model: "gemini-2.5-flash-image"
