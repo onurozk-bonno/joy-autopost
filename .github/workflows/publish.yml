@@ -51,6 +51,6 @@ jobs:
           git config user.email "joy-autopost@users.noreply.github.com"
           git add -A
           git commit -m "Paylaşıldı ${{ steps.meta.outputs.draft_id }}" || true
-          git push
+          git pull --rebase --autostash && git push
           gh issue comment ${{ github.event.issue.number }} --body "Paylaşıldı: ${{ steps.publish.outputs.permalink }}"
           gh issue close ${{ github.event.issue.number }}

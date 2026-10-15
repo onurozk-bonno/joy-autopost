@@ -32,8 +32,12 @@ jobs:
         env:
           REPLICATE_API_TOKEN: ${{ secrets.REPLICATE_API_TOKEN }}
           REPLICATE_MODEL: ${{ vars.REPLICATE_MODEL }}
+          IMAGE_BACKEND: ${{ vars.IMAGE_BACKEND }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           CLAUDE_MODEL: ${{ vars.CLAUDE_MODEL }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_MODEL: ${{ vars.GEMINI_MODEL }}
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
         run: python main.py draft
 
       - name: Taslağı kaydet
@@ -42,7 +46,7 @@ jobs:
           git config user.email "joy-autopost@users.noreply.github.com"
           git add -A
           git commit -m "Taslak ${{ steps.draft.outputs.draft_id }}"
-          git push
+          git pull --rebase --autostash && git push
 
       - name: Mod öğren
         id: mode
@@ -76,4 +80,4 @@ jobs:
           python main.py publish --draft "${{ steps.draft.outputs.draft_id }}"
           git add -A
           git commit -m "Paylaşıldı ${{ steps.draft.outputs.draft_id }}"
-          git push
+          git pull --rebase --autostash && git push
