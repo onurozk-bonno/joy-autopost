@@ -99,13 +99,22 @@ FALLBACK_LINES = {
 }
 
 
+# Instagram allows at most 5 hashtags per post (since Dec 2025): 2 niche + 1 scene + #aiart + 1 rotating
+SCENE_TAGS = {
+    "lake_mist": "#mistymorning", "waterfall": "#waterfall", "mountain_meadow": "#mountaindog",
+    "river_bed": "#riverdog", "forest_fog": "#forestwalk", "steppe_sunset": "#goldenhour",
+    "beach_dunes": "#beachdog", "autumn_lake": "#autumnvibes", "snowy_forest": "#snowdog",
+    "canyon_stream": "#adventuredog", "lavender_hill": "#lavenderfields", "rainy_marsh": "#rainyday",
+}
+
+
 def fallback_caption(scene: dict) -> str:
     tr, en = FALLBACK_LINES.get(scene["scene_id"], ("Doğada özgür bir ruh.", "A free spirit in the wild."))
     return (
         f"{tr}\nJoy'un hayal sahnelerinden biri 🌿\n\n"
         f"{en}\nOne of Joy's dream scenes.\n\n"
-        "#afghanhound #afgantazısı #joytheafghanhound #aiart #yapayzeka #dogsofinstagram "
-        "#köpek #doğa #naturelovers #sighthound"
+        f"#afghanhound #joytheafghanhound {SCENE_TAGS.get(scene['scene_id'], '#naturedog')} #aiart "
+        f"{'#afgantazısı' if hash(scene['scene_id']) % 2 else '#sighthound'}"
     )
 
 

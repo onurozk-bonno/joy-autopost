@@ -74,8 +74,9 @@ Rules:
 - Voice: Joy's gentle inner world, poetic but short (1-3 sentences per language). No cheesy puns.
 - Mention naturally that this is one of "Joy's dream scenes" / "Joy'un hayal sahneleri" so readers
   know the image is AI-made.
-- Then 8-12 relevant hashtags on one line, mixing Turkish and English, and ALWAYS include
-  #aiart #yapayzeka #afghanhound.
+- Then EXACTLY 5 hashtags on one line (Instagram's maximum): #afghanhound #joytheafghanhound,
+  one specific tag for the scene (e.g. #beachdog, #waterfall), #aiart, and one of #afgantazısı or #sighthound.
+  No generic tags like #explore, #reels, #instagood.
 - No emojis except at most one nature emoji.
 
 Reply ONLY with JSON: {{"caption": "..."}}"""
