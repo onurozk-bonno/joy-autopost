@@ -10,3 +10,6 @@ description: Bir taslağı GitHub onay akışıyla Instagram'da yayınlama adım
 6. Reels'te Instagram AI etiketini kontrol ettir (API ekleyemiyor).
 Hata ayıklama: `gh run view --log-failed`. Sık hatalar: görsel oranı 4:5 dışında, video ses izi yok,
 token süresi dolmuş (maintenance.yml ile test et).
+
+## Kendini iyileştir
+Bitirdiğinde `.claude/LEARNINGS.md`'yi oku ve `retro` skill'ine göre yeni dersi ekle; bu dosyada gerekli küçük düzeltmeyi PR ile öner.

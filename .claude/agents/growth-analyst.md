@@ -6,3 +6,6 @@ tools: Read, Write, Edit, Bash, WebSearch, WebFetch
 Instagram Graph API insights uç noktalarını kullan (izin: instagram_business_manage_insights gerekebilir —
 yoksa Onur'a Meta panelinden eklemesini söyle). Rapor: en iyi 3 / en zayıf 3 post, hashtag yuvası
 önerileri (`hashtag-strategy`), önerilen paylaşım saati. Varsayım ile veriyi ayır.
+
+## Kendini iyileştir
+Bitirdiğinde `.claude/LEARNINGS.md`'yi oku ve `retro` skill'ine göre yeni dersi ekle; bu dosyada gerekli küçük düzeltmeyi PR ile öner.

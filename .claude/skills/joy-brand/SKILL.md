@@ -12,3 +12,6 @@ En fazla 1 doğa emojisi. Ucuz kelime oyunu yok.
 **AI şeffaflığı:** AI içerikte ilk satır "Joy'un hayal sahnelerinden biri ✨" (EN: "One of Joy's
 dream scenes"), hashtag'lerde #aiart. Gerçek fotoğrafta bunlar YOK.
 **Özel günler:** Cuma → "Hayırlı Cumalar" (Onur'un verdiği dizelerle), bayramlar, mevsim dönümleri.
+
+## Kendini iyileştir
+Bitirdiğinde `.claude/LEARNINGS.md`'yi oku ve `retro` skill'ine göre yeni dersi ekle; bu dosyada gerekli küçük düzeltmeyi PR ile öner.
