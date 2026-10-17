@@ -11,3 +11,5 @@ description: Bir görselden yazı katmanlı ve özgün müzikli 9:16 Reels video
    delay-reverb, 1 sn fade in / 1.2 sn fade out, tepe 0.6; `-map 0:v -map 1:a -c:v copy -c:a aac`.
 4. Kontrol: ffprobe (1080x1920, h264, aac, süre), birkaç kareyi görüntüle — yazı kenara taşmamalı.
 5. JSON: media_type "reel", caption + 5 hashtag.
+6. CLI: `python main.py reel --from <jpg> --text "satır1|satır2|satır3" [--emphasis "Hayırlı Cumalar"] [--music] [--seconds 10] [--out yol]`
+   (`--out` yoksa drafts/<id>.mp4 + .json "draft" olarak yazar; asla paylaşmaz). drawtext için ffmpeg'in freetype ile derlenmiş olması ve DejaVu Serif fontu gerekir.
