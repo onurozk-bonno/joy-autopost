@@ -27,17 +27,24 @@ jobs:
         env:
           IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
           IG_USER_ID: ${{ secrets.IG_USER_ID }}
-        run: python main.py check
+        run: python src/main.py check
 
       - name: Token yenile
         id: refresh
         if: github.event_name == 'schedule' || inputs.only_check == false
         env:
           IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
-        run: python main.py refresh-token
+        run: python src/main.py refresh-token
 
       # Yenilenen token'ı secret'a yazmak için GH_ADMIN_TOKEN (secrets yazma yetkili
       # fine-grained token) gerekir. Yoksa bu adım atlanır; eski token 60 gün boyunca geçerli kalır.
+      - name: GH_ADMIN_TOKEN uyarısı
+        if: steps.refresh.outputs.new_token != '' && env.HAS_ADMIN != 'true'
+        run: |
+          echo "::warning title=GH_ADMIN_TOKEN yok::Token yenilendi ama IG_ACCESS_TOKEN secret'ına yazılamadı. Eski token geçerliliği bitince paylaşım durur; GH_ADMIN_TOKEN (fine-grained, bu repo, Secrets: write) ekle."
+          echo "### Uyarı: GH_ADMIN_TOKEN tanımlı değil" >> "$GITHUB_STEP_SUMMARY"
+          echo "Bağlantı testi geçti, token yenilendi ama secret güncellenmedi." >> "$GITHUB_STEP_SUMMARY"
+
       - name: Secret'ı güncelle
         if: steps.refresh.outputs.new_token != '' && env.HAS_ADMIN == 'true'
         env:

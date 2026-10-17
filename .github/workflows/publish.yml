@@ -41,7 +41,7 @@ jobs:
         env:
           IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
           IG_USER_ID: ${{ secrets.IG_USER_ID }}
-        run: python main.py publish --draft "${{ steps.meta.outputs.draft_id }}"
+        run: python src/main.py publish --draft "${{ steps.meta.outputs.draft_id }}"
 
       - name: Kaydet ve Issue'yu kapat
         env:

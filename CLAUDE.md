@@ -6,15 +6,17 @@ Tüm konuşmalar Türkçe.
 
 ## Mimari (kısa)
 - Repo: github.com/onurozk-bonno/joy-autopost (PUBLIC — Instagram görseli raw.githubusercontent'tan çeker)
-- Dosyalar şu an repo kökünde düz duruyor (main.py, common.py, generate.py, instagram.py, reel.py,
-  scene.py, claude_tasks.py, settings.yaml, scenes.yaml, history.json). common.py hem düz hem
-  src/config/state düzenini destekler.
+- Düzen: `src/` (main.py, common.py, generate.py, instagram.py, reel.py, scene.py, claude_tasks.py,
+  train_lora.py), `config/` (settings.yaml, scenes.yaml), `state/history.json`, `drafts/` kökte.
+  Komutlar: `python src/main.py draft|publish|check|refresh-token`. Bağımlılıklar: `requirements.txt`
+  (temel) + `requirements-claude.txt` (ANTHROPIC_API_KEY varsa) + `requirements-replicate.txt` (replicate backend).
 - Görsel: Gemini (`gemini-2.5-flash-image`) + `refs/` içindeki Joy referans fotoğrafları.
 - Taslak = `drafts/<YYYYMMDD-HHMM>.jpg|mp4` + aynı adlı `.json` (caption, media_type: image|reel).
 - Paylaşım: başlığı `Taslak <id>` olan bir Issue'ya `onay` etiketi eklenince `publish.yml` paylaşır,
   linki yorum yazar, Issue'yu kapatır. Sadece repo sahibinin etiketi tetikler.
 - Workflow'lar: `daily.yml` (her gün 15:43 UTC taslak + onay Issue'su), `publish.yml`, `maintenance.yml`
-  (token testi/yenileme).
+  (token testi/yenileme). `daily.yml` taslak üretemezse kırmızı
+  olmaz; `taslak-hata` etiketli "Taslak üretilemedi" Issue'su açar/yorumlar.
 
 ## Değişmez kurallar
 1. **Herkese açık paylaşım = Onur'un açık onayı.** `onay` etiketini Onur söylemeden ekleme.
