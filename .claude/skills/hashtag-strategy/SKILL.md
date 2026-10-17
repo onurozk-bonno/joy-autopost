@@ -8,3 +8,6 @@ Kalıp: 1) #afghanhound 2) #joytheafghanhound 3) sahneye özel (#beachdog #water
 gerçek fotoda yerine sahne/tür etiketi) 5) #afgantazısı veya #sighthound sırayla. Özel gün: 3. yuva
 özel güne (#hayırlıcumalar). Yasak: #explore #reels #instagood #dogsofinstagram gibi dev/genel etiketler.
 Her 2-3 haftada Insights'taki "hashtag'lerden gelen görüntülenme"ye göre 3. ve 5. yuvayı güncelle.
+
+## Kendini iyileştir
+Bitirdiğinde `.claude/LEARNINGS.md`'yi oku ve `retro` skill'ine göre yeni dersi ekle; bu dosyada gerekli küçük düzeltmeyi PR ile öner.

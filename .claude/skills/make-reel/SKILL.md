@@ -11,3 +11,6 @@ description: Bir görselden yazı katmanlı ve özgün müzikli 9:16 Reels video
    delay-reverb, 1 sn fade in / 1.2 sn fade out, tepe 0.6; `-map 0:v -map 1:a -c:v copy -c:a aac`.
 4. Kontrol: ffprobe (1080x1920, h264, aac, süre), birkaç kareyi görüntüle — yazı kenara taşmamalı.
 5. JSON: media_type "reel", caption + 5 hashtag.
+
+## Kendini iyileştir
+Bitirdiğinde `.claude/LEARNINGS.md`'yi oku ve `retro` skill'ine göre yeni dersi ekle; bu dosyada gerekli küçük düzeltmeyi PR ile öner.
